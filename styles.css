@@ -6,6 +6,8 @@ html {
 
 *, *:before, *:after {
   box-sizing: inherit;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -15,47 +17,47 @@ body {
   align-items: center;
   font-family: sans-serif;
   font-size: 20px;
-  margin: 0;
 }
 
 .items {
-  height: 800px;
-  padding: 100px;
-  width: 100%;
-  border: 1px solid white;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  white-space: nowrap;
-  user-select: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  transform: scale(0.98);
-  will-change: transform;
   position: relative;
-  background: rgba(255,255,255,0.1);
-  font-size: 0;
-  perspective: 500px;
-}
-
-.items.active {
-  background: rgba(255,255,255,0.3);
-  cursor: grabbing;
-  cursor: -webkit-grabbing;
-  transform: scale(1);
+  width: 1000px;
+  height: 800px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 160px;
+  gap: 20px;
+  perspective: 1000px;
+  overflow: hidden;
 }
 
 .item {
-  width: 200px;
-  height: calc(100% - 40px);
-  display: inline-flex;
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 80px;
-  font-weight: 100;
-  color: rgba(0,0,0,0.15);
-  box-shadow: inset 0 0 0 10px rgba(0,0,0,0.15);
+  font-size: 40px;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: move;
+  touch-action: none;
+  transition: transform 0.1s ease-out, box-shadow 0.2s;
+  border-radius: 8px;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.item.dragging {
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: none;
+}
+
+/* Color variations */
 .item:nth-child(9n+1) { background: dodgerblue;}
 .item:nth-child(9n+2) { background: goldenrod;}
 .item:nth-child(9n+3) { background: paleturquoise;}
@@ -66,5 +68,35 @@ body {
 .item:nth-child(9n+8) { background: darkslateblue;}
 .item:nth-child(9n+9) { background: rebeccapurple;}
 
-.item:nth-child(even) { transform: scaleX(1.31) rotateY(40deg); }
-.item:nth-child(odd) { transform: scaleX(1.31) rotateY(-40deg); }
+/* Remove 3D transforms from original code */
+.item:nth-child(even),
+.item:nth-child(odd) {
+  transform: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1200px) {
+  .items {
+    width: 90vw;
+    height: 90vh;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 120px;
+  }
+  
+  .item {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .items {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 100px;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .item {
+    font-size: 24px;
+  }
+}

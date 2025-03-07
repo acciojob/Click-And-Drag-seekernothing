@@ -1,60 +1,66 @@
-const slider = document.querySelector('.items');
-let isDown = false;
-let startX;
-let scrollLeft;
+const container = document.querySelector('.items');
+const items = document.querySelectorAll('.item');
+let activeItem = null;
+let startX, startY, initialX, initialY;
 
-// When mouse button is pressed down
-slider.addEventListener('mousedown', (e) => {
-  isDown = true;
-  slider.classList.add('active');
-  // Get initial mouse position relative to the container
-  startX = e.pageX - slider.offsetLeft;
-  // Get current scroll position
-  scrollLeft = slider.scrollLeft;
+// Add drag handlers to all items
+items.forEach(item => {
+  item.addEventListener('mousedown', startDrag);
+  item.addEventListener('touchstart', startDrag);
 });
 
-// When mouse leaves the container
-slider.addEventListener('mouseleave', () => {
-  isDown = false;
-  slider.classList.remove('active');
-});
-
-// When mouse button is released
-slider.addEventListener('mouseup', () => {
-  isDown = false;
-  slider.classList.remove('active');
-});
-
-// When mouse is moved while button is pressed
-slider.addEventListener('mousemove', (e) => {
-  if (!isDown) return;  // stop if mouse button is not pressed
-  e.preventDefault();  // prevent text selection
+function startDrag(e) {
+  activeItem = e.target;
+  const rect = activeItem.getBoundingClientRect();
   
-  // Calculate how far the mouse has moved
-  const x = e.pageX - slider.offsetLeft;
-  const walk = (x - startX) * 2; // multiply by 2 for faster scrolling
-  
-  // Update scroll position
-  slider.scrollLeft = scrollLeft - walk;
-});
+  // Get initial positions
+  startX = (e.clientX || e.touches[0].clientX) - rect.left;
+  startY = (e.clientY || e.touches[0].clientY) - rect.top;
+  initialX = rect.left - container.offsetLeft;
+  initialY = rect.top - container.offsetTop;
 
-// Add touch support for mobile devices
-slider.addEventListener('touchstart', (e) => {
-  isDown = true;
-  slider.classList.add('active');
-  startX = e.touches[0].pageX - slider.offsetLeft;
-  scrollLeft = slider.scrollLeft;
-});
+  // Add event listeners
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchmove', drag);
+  document.addEventListener('touchend', stopDrag);
+}
 
-slider.addEventListener('touchend', () => {
-  isDown = false;
-  slider.classList.remove('active');
-});
-
-slider.addEventListener('touchmove', (e) => {
-  if (!isDown) return;
+function drag(e) {
+  if (!activeItem) return;
   e.preventDefault();
-  const x = e.touches[0].pageX - slider.offsetLeft;
-  const walk = (x - startX) * 2;
-  slider.scrollLeft = scrollLeft - walk;
-});
+
+  // Calculate new position
+  const clientX = e.clientX || e.touches[0].clientX;
+  const clientY = e.clientY || e.touches[0].clientY;
+  
+  let newX = clientX - container.offsetLeft - startX;
+  let newY = clientY - container.offsetTop - startY;
+
+  // Boundary constraints
+  const containerRect = container.getBoundingClientRect();
+  const itemRect = activeItem.getBoundingClientRect();
+  
+  newX = Math.max(0, Math.min(newX, containerRect.width - itemRect.width));
+  newY = Math.max(0, Math.min(newY, containerRect.height - itemRect.height));
+
+  // Apply movement
+  activeItem.style.transform = `translate(${newX}px, ${newY}px)`;
+}
+
+function stopDrag() {
+  if (!activeItem) return;
+  
+  // Update final position
+  const transform = activeItem.style.transform;
+  activeItem.style.left = transform.replace('translate', '').replace(/[()]/g, '');
+  activeItem.style.transform = '';
+  
+  activeItem = null;
+  
+  // Remove listeners
+  document.removeEventListener('mousemove', drag);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchmove', drag);
+  document.removeEventListener('touchend', stopDrag);
+}
